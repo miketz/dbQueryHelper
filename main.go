@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
+	"strings"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
@@ -11,15 +14,105 @@ import (
 // fake credentails
 const connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS&TrustServerCertificate=true&Integrated Security=true&trusted_connection=yes"
 
+func printCommands() {
+	fmt.Printf(`Enter a command:
+	schemas
+	tables
+	views
+	cols
+`)
+}
+
 func main() {
-	fmt.Printf("starting...\n")
-
-	cols := getColData()
-	for _, col := range cols {
-		fmt.Println("col: ", col)
+	if len(os.Args) < 2 { // GUARD: command line arg required
+		printCommands()
+		return
 	}
+	switch command := os.Args[1]; strings.ToLower(command) {
+	case "schemas":
+		printSchemas()
+	case "tables":
+		printTables()
+	case "views":
+		printViews()
+	case "cols":
+		printCols()
+	default:
+		printCommands()
+	}
+}
 
-	fmt.Printf("done\n")
+const SEP = "|"
+const SEP_OUTER = ","
+
+func printSchemas() {
+	schemas := getSchemas()
+	// print all but last with trailing SEP
+	for i := 0; i < len(schemas)-1; i++ {
+		fmt.Printf("%s%s", schemas[i], SEP)
+	}
+	// no SEP after last
+	iLast := len(schemas) - 1
+	fmt.Printf("%s", schemas[iLast])
+}
+
+func printTables() {
+	tables := getTables()
+	// print all but last with trailing SEP
+	for i := 0; i < len(tables)-1; i++ {
+		tab := tables[i]
+		fmt.Printf("%s%s%s%s", tab.Schema, SEP, tab.Name, SEP_OUTER)
+	}
+	// no SEP after last
+	iLast := len(tables) - 1
+	last := tables[iLast]
+	fmt.Printf("%s%s%s", last.Schema, SEP, last.Name)
+}
+
+func printViews() {
+	views := getViews()
+	// print all but last with trailing SEP
+	for i := 0; i < len(views)-1; i++ {
+		view := views[i]
+		fmt.Printf("%s%s%s%s", view.Schema, SEP, view.Name, SEP_OUTER)
+	}
+	// no SEP after last
+	iLast := len(views) - 1
+	last := views[iLast]
+	fmt.Printf("%s%s%s", last.Schema, SEP, last.Name)
+}
+
+func printCols() {
+	cols := getColData()
+	// print all but last with trailing SEP
+	for i := 0; i < len(cols)-1; i++ {
+		col := cols[i]
+		maxLen := ""
+		if col.CharacterMaxLen.Valid {
+			maxLen = strconv.Itoa(int(col.CharacterMaxLen.Int32))
+		}
+		fmt.Printf("%s%s%s%s%s%s%s%s%s%s%d%s",
+			col.TableSchema, SEP,
+			col.TableName, SEP,
+			col.ColName, SEP,
+			col.DataType, SEP,
+			maxLen, SEP,
+			col.OrdinalPositionn, SEP_OUTER)
+	}
+	// no SEP after last
+	iLast := len(cols) - 1
+	last := cols[iLast]
+	maxLen := ""
+	if last.CharacterMaxLen.Valid {
+		maxLen = strconv.Itoa(int(last.CharacterMaxLen.Int32))
+	}
+	fmt.Printf("%s%s%s%s%s%s%s%s%s%s%d",
+		last.TableSchema, SEP,
+		last.TableName, SEP,
+		last.ColName, SEP,
+		last.DataType, SEP,
+		maxLen, SEP,
+		last.OrdinalPositionn)
 }
 
 // get relevant scheam names for autocompletion.
