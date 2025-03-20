@@ -8,7 +8,7 @@ func main() {
 	fmt.Printf("test\n")
 }
 
-var sqlGetSchemas string = `select s.SCHEMA_NAME
+const sqlGetSchemas string = `select s.SCHEMA_NAME
 from INFORMATION_SCHEMA.SCHEMATA s
 order by s.SCHEMA_NAME`
 
