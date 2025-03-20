@@ -14,9 +14,9 @@ const connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?databas
 func main() {
 	fmt.Printf("starting...\n")
 
-	views := getViews()
-	for _, view := range views {
-		fmt.Printf("%v\n", view)
+	cols := getColData()
+	for _, col := range cols {
+		fmt.Println("col: ", col)
 	}
 
 	fmt.Printf("done\n")
@@ -131,4 +131,42 @@ func getViews() []View {
 		views = append(views, view)
 	}
 	return views
+}
+
+type ColData struct {
+	TableSchema      string
+	TableName        string
+	ColName          string
+	DataType         string
+	CharacterMaxLen  sql.NullInt32
+	OrdinalPositionn int
+}
+
+const sqlGetColData = `select c.TABLE_SCHEMA, c.TABLE_NAME, c.COLUMN_NAME, c.DATA_TYPE, c.CHARACTER_MAXIMUM_LENGTH, c.ORDINAL_POSITION
+from INFORMATION_SCHEMA.COLUMNS c
+order by c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION`
+
+func getColData() []ColData {
+	cols := make([]ColData, 0, 16384)
+
+	db, err := sql.Open("sqlserver", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query(sqlGetColData)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		col := ColData{}
+		err := rows.Scan(&col.TableSchema, &col.TableName, &col.ColName, &col.DataType, &col.CharacterMaxLen, &col.OrdinalPositionn)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cols = append(cols, col)
+	}
+	return cols
 }
