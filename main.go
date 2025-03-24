@@ -45,6 +45,8 @@ func main() {
 const SEP = "|"
 const SEP_OUTER = ","
 
+// print schemas in CSV format:
+// schema|...
 func printSchemas() {
 	schemas := getSchemas()
 	// print all but last with trailing SEP
@@ -56,6 +58,8 @@ func printSchemas() {
 	fmt.Printf("%s", schemas[iLast])
 }
 
+// print tables in CSV format:
+// schema|table, ...
 func printTables() {
 	tables := getTables()
 	// print all but last with trailing SEP
@@ -69,6 +73,8 @@ func printTables() {
 	fmt.Printf("%s%s%s", last.Schema, SEP, last.Name)
 }
 
+// print views in CSV format:
+// schema|view, ...
 func printViews() {
 	views := getViews()
 	// print all but last with trailing SEP
@@ -82,6 +88,8 @@ func printViews() {
 	fmt.Printf("%s%s%s", last.Schema, SEP, last.Name)
 }
 
+// print col data in CSV format:
+// schema|table|col|dataType|maxLen|ordPos, ...
 func printCols() {
 	cols := getColData()
 	// print all but last with trailing SEP
