@@ -9,4 +9,4 @@ go get github.com/microsoft/go-mssqldb
 
 # build
 
-go build main.go
+go build
