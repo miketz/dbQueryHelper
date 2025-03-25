@@ -12,9 +12,12 @@ import (
 )
 
 // fake credentails
-const connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS&TrustServerCertificate=true&Integrated Security=true&trusted_connection=yes"
+var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS"
+
+// var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS&TrustServerCertificate=true&Integrated Security=true&trusted_connection=yes"
 
 func printCommands() {
+	fmt.Printf("usage: command connStr\n")
 	fmt.Printf(`Enter a command:
 	schemas
 	tables
@@ -28,6 +31,12 @@ func main() {
 		printCommands()
 		return
 	}
+
+	// get connStr from command line args if available.
+	if len(os.Args) > 2 {
+		connStr = os.Args[2]
+	}
+
 	switch command := os.Args[1]; strings.ToLower(command) {
 	case "schemas":
 		printSchemas()
