@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	_ "github.com/microsoft/go-mssqldb"
 )
@@ -17,12 +19,13 @@ var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=
 // var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS&TrustServerCertificate=true&Integrated Security=true&trusted_connection=yes"
 
 func printCommands() {
-	fmt.Printf("usage: command connStr\n")
-	fmt.Printf(`Enter a command:
+	fmt.Printf("usage: command connStr [\"query\"]\n")
+	fmt.Printf(`command types:
 	schemas
 	tables
 	views
 	cols
+	query
 `)
 }
 
@@ -46,6 +49,13 @@ func main() {
 		printViews()
 	case "cols":
 		printCols()
+	case "query":
+		if len(os.Args) < 4 {
+			printCommands()
+			return
+		}
+		query := os.Args[3]
+		runQuery(query)
 	default:
 		printCommands()
 	}
@@ -279,4 +289,50 @@ func getColData() []ColData {
 		cols = append(cols, col)
 	}
 	return cols
+}
+
+// struct to handle any query output. query unknown at build time.
+type ResultTable struct {
+	ColNames [][]string
+	ColVals  [][]string
+}
+
+// run query, print results to std out
+func runQuery(sqlQuery string) {
+	db, err := sql.Open("sqlserver", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query(sqlQuery)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// print col names
+	w := tabwriter.NewWriter(os.Stdout, 0, 2, 1, ' ', 0)
+	defer w.Flush()
+	w.Write([]byte(strings.Join(cols, "\t") + "\n"))
+
+	// prepare rows
+	row := make([][]byte, len(cols))
+	rowPtr := make([]any, len(cols))
+	for i := range row {
+		rowPtr[i] = &row[i]
+	}
+	sep := []byte("\t")
+	newLine := []byte("\n")
+	// print rows
+	for rows.Next() {
+		_ = rows.Scan(rowPtr...)
+
+		w.Write(bytes.Join(row, sep))
+		w.Write(newLine)
+	}
 }
