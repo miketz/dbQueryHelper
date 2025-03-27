@@ -291,12 +291,6 @@ func getColData() []ColData {
 	return cols
 }
 
-// struct to handle any query output. query unknown at build time.
-type ResultTable struct {
-	ColNames [][]string
-	ColVals  [][]string
-}
-
 // run query, print results to std out
 func runQuery(sqlQuery string) {
 	db, err := sql.Open("sqlserver", connStr)
