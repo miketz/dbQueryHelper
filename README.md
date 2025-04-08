@@ -9,5 +9,6 @@ go get github.com/microsoft/go-mssqldb
 ```
 
 # build
-
+```bash
 go build
+```
