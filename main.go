@@ -1,3 +1,5 @@
+// sample run query command:
+// go run main.go query "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS" "c:/Users/mtz/AppData/Local/my-sql-comp-tmp.sql"
 package main
 
 import (
@@ -19,7 +21,7 @@ var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=
 // var connStr = "sqlserver://tester123:tester123@localhost/MSSQLSERVER01?database=OSHE_WIRS&TrustServerCertificate=true&Integrated Security=true&trusted_connection=yes"
 
 func printCommands() {
-	fmt.Printf("usage: command connStr [\"query\"]\n")
+	fmt.Printf("usage: command connStr [\"queryFile\"]\n")
 	fmt.Printf(`command types:
 	schemas
 	tables
@@ -54,8 +56,14 @@ func main() {
 			printCommands()
 			return
 		}
-		query := os.Args[3]
-		runQuery(query)
+		// Transfer query text via file, not command line arg.
+		// On MS-windows there are very complicatd escaping rules making it difficult to run queries with special chars like "%".
+		queryFile := os.Args[3]
+		queryBytes, err := os.ReadFile(queryFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		runQuery(string(queryBytes))
 	default:
 		printCommands()
 	}
