@@ -31,14 +31,19 @@ func printCommands() {
 `)
 }
 
+// min command line args. not counting prog name.
+const minArgs int = 1
+
 func main() {
-	if len(os.Args) < 2 { // GUARD: command line arg required
+	// don't count progName, so -1
+	var argc int = len(os.Args) - 1
+	if argc < minArgs { // GUARD: command line arg required
 		printCommands()
 		return
 	}
 
 	// get connStr from command line args if available.
-	if len(os.Args) > 2 {
+	if argc > 1 {
 		connStr = os.Args[2]
 	}
 
@@ -52,7 +57,7 @@ func main() {
 	case "cols":
 		printCols()
 	case "query":
-		if len(os.Args) < 4 {
+		if argc < 3 {
 			printCommands()
 			return
 		}
