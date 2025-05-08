@@ -12,3 +12,8 @@ go get github.com/microsoft/go-mssqldb
 ```bash
 go build
 ```
+
+or use -ldflags to omit symbol table, debug info, and dwarf symbol table. (smaller binary).
+```bash
+go build -ldflags="-s -w"
+```
