@@ -17,7 +17,7 @@ vet: fmt
 # use -gcflags=-B to eliminate bounds checks
 .PHONY: build
 build: vet
-	CGO_ENABLED=0 go build -gcflags=-B -ldflags="-s -w" -trimpath
+	go build -gcflags=-B -ldflags="-s -w" -trimpath
 
 # a typical go build. nothing stripped out.
 buildFat: vet
