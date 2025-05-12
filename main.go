@@ -325,7 +325,7 @@ func runQuery(sqlQuery string) {
 	// print col names
 	w := tabwriter.NewWriter(os.Stdout, 0, 2, 1, ' ', 0)
 	defer w.Flush()
-	w.Write([]byte(strings.Join(cols, "\t") + "\n"))
+	_, _ = w.Write([]byte(strings.Join(cols, "\t") + "\n"))
 
 	// prepare rows
 	row := make([][]byte, len(cols))
@@ -339,7 +339,7 @@ func runQuery(sqlQuery string) {
 	for rows.Next() {
 		_ = rows.Scan(rowPtr...)
 
-		w.Write(bytes.Join(row, sep))
-		w.Write(newLine)
+		_, _ = w.Write(bytes.Join(row, sep))
+		_, _ = w.Write(newLine)
 	}
 }
